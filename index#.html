@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفع الصور للعبة</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; padding: 40px 20px; }
+        .box { background: #1e1e1e; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { margin-bottom: 20px; color: #4CAF50; }
+        input[type="file"] { display: none; }
+        .btn { display: block; background: #2196F3; color: #fff; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 16px; margin-bottom: 10px; border: none; width: 100%; transition: 0.3s; }
+        .btn:hover { background: #1976D2; }
+        .btn-upload { background: #4CAF50; }
+        .btn-upload:hover { background: #45a049; }
+        #status { margin-top: 15px; font-weight: bold; color: #FFC107; }
+        #preview { max-width: 100%; border-radius: 10px; margin-top: 15px; display: none; max-height: 200px; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>تطبيق الألعاب - رفع الصور</h2>
+    
+    <input type="file" id="fileInput" accept="image/*">
+    <label for="fileInput" class="btn" id="selectBtn">اختر صورة</label>
+    
+    <img id="preview" alt="معاينة الصورة">
+    
+    <button class="btn btn-upload" id="uploadBtn" style="display: none;">إرسال الصورة للسيرفر</button>
+    
+    <div id="status"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // إعدادات Firebase الخاصة بك
+    const firebaseConfig = {
+        apiKey: "AIzaSyAUmHcm0d0ErUph8l132llavVcUfwHWfic",
+        authDomain: "gaming-platform-5ef6c.firebaseapp.com",
+        projectId: "gaming-platform-5ef6c",
+        storageBucket: "gaming-platform-5ef6c.firebasestorage.app",
+        messagingSenderId: "332262507211",
+        appId: "1:332262507211:web:dd51b094b7d3e4ab68914e",
+        measurementId: "G-GVYDLMTY22"
+    };
+
+    // تشغيل Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // عناصر الصفحة
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const status = document.getElementById('status');
+    const selectBtn = document.getElementById('selectBtn');
+
+    let selectedFile = null;
+
+    // عند اختيار صورة
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+                uploadBtn.style.display = 'block';
+                selectBtn.textContent = 'تغيير الصورة';
+                status.textContent = 'الصورة جاهزة للإرسال';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // عند الضغط على إرسال
+    uploadBtn.addEventListener('click', async function() {
+        if (!selectedFile) return;
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'جاري الإرسال...';
+        status.textContent = 'يتم تحويل الصورة ورفعها... يرجى الانتظار';
+
+        try {
+            // تحويل الصورة إلى Base64
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const base64String = event.target.result;
+
+                // إرسال البيانات إلى Firestore
+                await addDoc(collection(db, "uploads"), {
+                    imageBase64: base64String,
+                    fileName: selectedFile.name,
+                    fileType: selectedFile.type,
+                    uploadedAt: serverTimestamp()
+                });
+
+                // نجاح
+                status.style.color = '#4CAF50';
+                status.textContent = '✅ تم رفع الصورة بنجاح!';
+                uploadBtn.style.display = 'none';
+                preview.style.display = 'none';
+                selectBtn.textContent = 'اختر صورة أخرى';
+                selectedFile = null;
+            };
+            reader.readAsDataURL(selectedFile);
+
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            status.style.color = '#F44336';
+            status.textContent = '❌ حدث خطأ: ' + error.message;
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'إرسال الصورة للسيرفر';
+        }
+    });
+</script>
+
+</body>
+</html>
