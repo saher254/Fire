@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مادة البرمجة | منصة البكالوريا</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #ffffff; --text: #0f172a; --card: #ffffff; --accent: #4f46e5;
+        --border: #e2e8f0; --danger: #ef4444; --muted: #64748b;
+        --shadow: 0 10px 25px -5px rgba(0,0,0,0.05); --shadow-hover: 0 20px 30px -10px rgba(0,0,0,0.1);
+    }
+    body.dark {
+        --bg: #0b1120; --text: #f8fafc; --card: #1e293b; --border: #334155; --muted: #94a3b8; 
+        --shadow: 0 10px 25px -5px rgba(0,0,0,0.5); --shadow-hover: 0 20px 30px -10px rgba(0,0,0,0.8);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body { background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; }
+
+    .container { max-width: 900px; margin: 20px auto; padding: 0 15px; width: 100%; }
+
+    /* لوحة التحكم */
+    .admin-panel { border: 2px solid #4f46e5; background: rgba(79, 70, 229, 0.05); border-radius: 20px; padding: 20px; margin-bottom: 25px; }
+    .admin-panel h2 { font-size: 18px; color: #4f46e5; margin-bottom: 10px; }
+    .admin-panel h3 { font-size: 15px; color: #4f46e5; margin: 15px 0 5px; }
+    input, textarea, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); outline: none; }
+    button { font-family: 'Cairo', sans-serif; cursor: pointer; border: none; border-radius: 10px; padding: 10px 15px; font-weight: 700; transition: 0.2s; }
+    .btn-primary { background: #4f46e5; color: #fff; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-secondary { background: #f59e0b; color: #fff; }
+    .btn-small { padding: 5px 10px; font-size: 12px; }
+    .hidden { display: none !important; }
+
+    /* 🌟 تصميم المستطيلات */
+    .sections-container { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+    
+    .subject-card { background: var(--card); padding: 20px 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); cursor: pointer; transition: all 0.3s; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; text-decoration: none; color: var(--text); }
+    .subject-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 6px; background: #4f46e5; border-radius: 0 20px 20px 0; }
+    .subject-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: #4f46e5; }
+    .subject-card:active { transform: scale(0.98); }
+    .subject-card h2 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: var(--text); }
+    .subject-card .arrow { font-size: 22px; color: #4f46e5; transition: 0.3s; background: rgba(79, 70, 229, 0.1); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+    .subject-card:hover .arrow { transform: translateX(-5px); background: #4f46e5; color: #fff; }
+
+    .back-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; box-shadow: var(--shadow); }
+    .page-title { font-size: 24px; color: var(--accent); font-weight: 800; margin-bottom: 15px; text-align: center; }
+
+    .empty-msg { padding: 30px; text-align: center; color: var(--muted); font-size: 16px; background: var(--card); border-radius: 15px; border: 1px dashed var(--border); }
+
+    @media (max-width: 768px) {
+        .container { margin: 15px auto; }
+        .subject-card { padding: 15px 20px; }
+        .subject-card h2 { font-size: 18px; }
+        .subject-card .arrow { width: 35px; height: 35px; font-size: 18px; }
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- لوحة التحكم -->
+        <section id="adminPanel" class="admin-panel hidden">
+            <h2>🛠️ لوحة تحكم المدير (البرمجة)</h2>
+            <h3>إضافة كتاب / مذكرة جديدة</h3>
+            <select id="bookTerm">
+                <option value="term1">الترم الأول</option>
+                <option value="term2">الترم الثاني</option>
+            </select>
+            <input id="bookTitle" placeholder="اسم الكتاب أو المذكرة">
+            <input id="bookUrl" type="url" placeholder="رابط التحميل (جوجل درايف أو PDF مباشر)...">
+            <button id="addBookBtn" class="btn-primary" style="width:100%;">💾 إضافة الكتاب</button>
+        </section>
+
+        <!-- 🌟 شاشة الترمات -->
+        <div id="page-terms" class="sections-container">
+            <h2 class="page-title">💻 مادة البرمجة</h2>
+            <div class="subject-card" onclick="openTerm('term1')">
+                <h2>📘 الترم الأول</h2>
+                <span class="arrow">⬅️</span>
+            </div>
+            <div class="subject-card" onclick="openTerm('term2')">
+                <h2>📙 الترم الثاني</h2>
+                <span class="arrow">⬅️</span>
+            </div>
+        </div>
+
+        <!-- 🌟 شاشة الكتب -->
+        <div id="page-books" style="display: none;">
+            <button class="back-btn" onclick="showTermsPage()">🔙 رجوع للترمات</button>
+            <h2 id="currentTermTitle" class="page-title" style="font-size: 22px;"></h2>
+            <div id="booksContainer" class="sections-container"></div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { startVisit } from "./session.js";
+        await startVisit("programming.html");
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDe5INvR_ifEARHmw7M0qqBQ34-G6z4p7w",
+            authDomain: "mansa-educational.firebaseapp.com",
+            projectId: "mansa-educational",
+            storageBucket: "mansa-educational.firebasestorage.app",
+            messagingSenderId: "144298769750",
+            appId: "1:144298769750:web:43eb0c63e5d2acb37baaf7"
+        };
+
+        const app = initializeApp(firebaseConfig, "programmingBooksApp");
+        const db = getFirestore(app);
+        const booksRef = collection(db, "content");
+
+        // يبدأ المظهر افتراضياً في كل زيارة.
+
+        let isAdmin = false;
+        if (isAdmin) document.getElementById('adminPanel').classList.remove('hidden');
+
+        let currentTerm = null;
+
+        // ✅ إضافة كتاب
+        document.getElementById('addBookBtn').addEventListener('click', async () => {
+            if (!isAdmin) return alert("سجل دخول كمدير أولاً.");
+            const term = document.getElementById('bookTerm').value;
+            const title = document.getElementById('bookTitle').value.trim();
+            const url = document.getElementById('bookUrl').value.trim();
+
+            if (!title || !url) return alert("اكتب اسم الكتاب والرابط");
+
+            try {
+                await addDoc(booksRef, {
+                    kind: "book",
+                    subject: "programming",
+                    term: term,
+                    title: title,
+                    url: url,
+                    createdAt: Date.now()
+                });
+                
+                await addDoc(collection(db, "notifications"), {
+                    title: "📚 كتاب جديد",
+                    message: `تمت إضافة كتاب "${title}" لمادة البرمجة`,
+                    type: 'success',
+                    icon: '📚',
+                    createdAt: Date.now()
+                });
+
+                document.getElementById('bookTitle').value = "";
+                document.getElementById('bookUrl').value = "";
+                alert("✅ تم إضافة الكتاب بنجاح");
+                if (currentTerm) renderBooks(currentTerm);
+            } catch (e) { alert("خطأ: " + e.message); }
+        });
+
+        // ✅ فتح الترم
+        window.openTerm = function(term) {
+            currentTerm = term;
+            const title = term === 'term1' ? '📘 كتب الترم الأول' : '📙 كتب الترم الثاني';
+            document.getElementById('currentTermTitle').textContent = title;
+            document.getElementById('page-terms').style.display = 'none';
+            document.getElementById('page-books').style.display = 'block';
+            renderBooks(term);
+            window.scrollTo(0, 0);
+        };
+
+        // ✅ الرجوع للترمات
+        window.showTermsPage = function() {
+            currentTerm = null;
+            document.getElementById('page-books').style.display = 'none';
+            document.getElementById('page-terms').style.display = 'flex';
+            window.scrollTo(0, 0);
+        };
+
+        // ✅ عرض الكتب
+        async function renderBooks(term) {
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '<div class="empty-msg">⏳ جاري التحميل...</div>';
+
+            try {
+                const q = query(booksRef, where("subject", "==", "programming"), where("kind", "==", "book"), where("term", "==", term));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty-msg">لا توجد كتب في هذا الترم حتى الآن.</div>';
+                    return;
+                }
+
+                const books = [];
+                snapshot.forEach(d => books.push({ id: d.id, ...d.data() }));
+                books.sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+
+                container.innerHTML = '';
+                books.forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    
+                    let adminBtn = isAdmin ? `<button class="btn-danger btn-small" style="margin-left:10px;" onclick="event.stopPropagation(); deleteBook('${book.id}')">🗑️</button>` : '';
+
+                    card.innerHTML = `
+                        <h2>📄 ${book.title}</h2>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            ${adminBtn}
+                            <span class="arrow">⬇️</span>
+                        </div>
+                    `;
+                    
+                    card.onclick = () => window.open(book.url, '_blank');
+                    
+                    container.appendChild(card);
+                });
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-msg" style="color:red;">حدث خطأ: ${e.message}</div>`;
+            }
+        }
+
+        // ✅ حذف كتاب
+        window.deleteBook = async function(id) {
+            if (!isAdmin) return;
+            if (!confirm('هل أنت متأكد من حذف هذا الكتاب؟')) return;
+            try {
+                await deleteDoc(doc(db, "content", id));
+                renderBooks(currentTerm);
+            } catch (e) { alert("خطأ: " + e.message); }
+        };
+
+    </script>
+</body>
+</html>
